@@ -1,0 +1,13 @@
+#include <stdio.h>
+int main() {
+    int x[3][3]; // Sin inicializar
+    int i;
+    
+    for(i = 0; i < 3; i = i + 1) {
+        x[i][i] = 1;
+    }
+    
+    printf("%d\n", x[1][1]);
+    printf("%d\n", x[0][1]);
+    return 0;
+}

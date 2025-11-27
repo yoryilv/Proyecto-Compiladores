@@ -1,0 +1,12 @@
+#include <stdio.h>
+int main() {
+    long gran_numero = 2147483648;
+    unsigned uneg = 10;
+    
+    printf("%ld\n", gran_numero);
+    
+    if (uneg > 5) {
+        printf("%d\n", 1);
+    }
+    return 0;
+}

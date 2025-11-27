@@ -1,0 +1,7 @@
+#include <stdio.h>
+int main() {
+    int util = 10;
+    int inutil = 999; // Debería poder eliminarse si se optimiza
+    printf("%d\n", util);
+    return 0;
+}

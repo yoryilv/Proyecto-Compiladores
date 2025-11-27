@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int global_val = 5;
+
+void incrementar() {
+    global_val = global_val + 1;
+}
+
+int main() {
+    incrementar();
+    incrementar();
+    printf("%d\n", global_val); // Esperado: 7
+    return 0;
+}

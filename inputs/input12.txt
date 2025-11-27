@@ -1,0 +1,10 @@
+#include <stdio.h>
+int main() {
+    float pi = 3.14159;
+    if (pi > 3.0) {
+        printf("%d\n", 1);
+    } else {
+        printf("%d\n", 0);
+    }
+    return 0;
+}

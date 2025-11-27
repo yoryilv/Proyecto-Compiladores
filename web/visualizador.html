@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Ejecución - Compilador C to x86</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1e1e1e, #2d2d30);
+            color: #ffffff; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(45, 45, 48, 0.8);
+            border-radius: 10px;
+            border: 1px solid #3e3e42;
+        }
+        
+        .header h1 {
+            color: #569cd6;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #9cdcfe;
+            font-size: 1.1em;
+        }
+
+        .controls { 
+            display: flex; 
+            gap: 10px; 
+            margin: 20px 0; 
+            padding: 15px;
+            background: rgba(45, 45, 48, 0.8);
+            border-radius: 10px;
+            border: 1px solid #3e3e42;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        button { 
+            background: #0e639c; 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 6px; 
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover { 
+            background: #1177bb; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled { 
+            background: #424242; 
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .container { 
+            display: grid; 
+            grid-template-columns: 320px 1fr 350px; 
+            gap: 20px; 
+            min-height: 70vh;
+        }
+        
+        .panel { 
+            background: #2d2d30; 
+            border: 1px solid #3e3e42; 
+            border-radius: 10px; 
+            padding: 20px;
+            overflow: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel-header { 
+            color: #569cd6; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px; 
+            border-bottom: 2px solid #007acc; 
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .register { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 10px 0; 
+            padding: 8px 12px; 
+            background: #252526; 
+            border-radius: 6px;
+            border-left: 4px solid #007acc;
+            transition: all 0.3s ease;
+        }
+        
+        .register:hover { 
+            background: #2a2d2e; 
+            transform: translateX(5px);
+        }
+        
+        .register-name { 
+            color: #9cdcfe; 
+            font-weight: bold;
+        }
+        
+        .register-value { 
+            color: #ce9178; 
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .step-info {
+            background: #0e639c;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .instruction-info {
+            background: #383838;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #569cd6;
+        }
+        
+        .code-display {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            border: 1px solid #3e3e42;
+        }
+        
+        .stack-frame { 
+            background: #383838; 
+            margin: 8px 0; 
+            padding: 12px; 
+            border-radius: 6px;
+            border-left: 4px solid #d7ba7d;
+        }
+
+        #memory-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 5px;
+        }
+
+        /* 2. Celdas de memoria: Ajustar ancho */
+        .memory-cell { 
+            display: block; 
+            width: 100%; 
+            text-align: center; 
+            padding: 8px;
+            margin: 0;
+            background: #323232;
+            border-radius: 5px;
+            border: 1px solid #3e3e42;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .memory-cell:hover {
+            background: #3c3c3c;
+            transform: scale(1.05);
+        }
+        
+        .highlight { 
+            animation: pulse 1.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { 
+                background: #007acc; 
+                box-shadow: 0 0 10px #007acc;
+            }
+            50% { 
+                background: #264f78; 
+                box-shadow: 0 0 20px #007acc;
+            }
+            100% { 
+                background: #252526; 
+                box-shadow: none;
+            }
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        .speed-control input {
+            width: 120px;
+        }
+        
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #2d2d30;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #569cd6;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #007acc;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🖥️ Visualizador de Ejecución - Compilador C to x86</h1>
+        <div class="subtitle">Sistema de Traza en Tiempo Real</div>
+    </div>
+    
+    <div class="controls">
+        <button id="prev-step">⏮️ Anterior</button>
+        <button id="next-step">⏭️ Siguiente</button>
+        <button id="auto-step">▶️ Auto-ejecutar</button>
+        <button id="reset">🔄 Reiniciar</button>
+        <span id="step-info" class="step-info">Paso: 0/0</span>
+        <div class="speed-control">
+            <span>Velocidad: </span>
+            <input type="range" id="speed" min="1" max="10" value="5">
+            <span id="speed-value">5</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Panel de Registros -->
+        <div class="panel">
+            <h3 class="panel-header">⚙️ Registros CPU</h3>
+            <div id="registers-container">
+                <div class="register">
+                    <span class="register-name">RAX</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">RBX</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">RCX</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">RDX</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">RSI</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">RDI</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">RBP</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+                <div class="register">
+                    <span class="register-name">RSP</span>
+                    <span class="register-value">0x00000000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Código y Estado -->
+        <div class="panel">
+            <h3 class="panel-header">📝 Información de Ejecución</h3>
+            <div class="instruction-info">
+                <div><strong>Instrucción actual:</strong> <span id="current-instruction">Cargando...</span></div>
+                <div><strong>Contexto fuente:</strong> <span id="source-context">-</span></div>
+                <div><strong>Línea:</strong> <span id="line-number">-</span></div>
+            </div>
+            <h4 class="panel-header">💻 Código Ensamblador</h4>
+            <div class="code-display" id="assembly-code">
+# Esperando datos de traza...
+# Ejecuta un programa con --trace para generar execution_trace.json
+            </div>
+        </div>
+
+        <!-- Panel de Memoria -->
+        <div class="panel">
+            <h3 class="panel-header">🧠 Memoria y Pila</h3>
+            <div id="stack-display">
+                <div class="stack-frame">
+                    <strong>Stack Pointer (RSP):</strong> <span id="rsp-value">0x00000000</span>
+                </div>
+            </div>
+            <h4 class="panel-header">📊 Visualización de Pila</h4>
+            <div id="memory-display">
+                <div class="memory-cell">[0x0000]</div>
+                <div class="memory-cell">[0x0008]</div>
+                <div class="memory-cell">[0x0010]</div>
+                <div class="memory-cell">[0x0018]</div>
+                <div class="memory-cell">[0x0020]</div>
+                <div class="memory-cell">[0x0028]</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="visualizador.js"></script>
+</body>
+</html>

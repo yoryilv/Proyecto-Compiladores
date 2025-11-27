@@ -1,0 +1,14 @@
+#include <stdio.h>
+
+int main() {
+    int a = 10;
+    int b = 2;
+    int c = 20;
+    int d = 5;
+    
+    int res = a + (b * (c - d)); 
+
+    printf("%d\n", res);
+
+    return 0;
+}

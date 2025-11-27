@@ -1,0 +1,12 @@
+#include <stdio.h>
+int main() {
+    float notas[3] = {10.5, 11.5, 12.0};
+    float suma = 0.0;
+    int i;
+    
+    for(i=0; i<3; i=i+1) {
+        suma = suma + notas[i];
+    }
+    printf("%f\n", suma);
+    return 0;
+}
