@@ -50,6 +50,164 @@ bool Parser::isAtEnd() {
     return (current->type == Token::END);
 }
 
+static bool isConstant(Exp* e) {
+    return dynamic_cast<NumberExp*>(e) || dynamic_cast<FloatExp*>(e) ||
+           dynamic_cast<LongExp*>(e) || dynamic_cast<UnsignedExp*>(e);
+}
+
+static double getDoubleVal(Exp* e) {
+    if (auto* n = dynamic_cast<NumberExp*>(e)) return (double)n->value;
+    if (auto* f = dynamic_cast<FloatExp*>(e)) return f->value;
+    if (auto* l = dynamic_cast<LongExp*>(e)) return (double)l->value;
+    if (auto* u = dynamic_cast<UnsignedExp*>(e)) return (double)u->value;
+    return 0.0;
+}
+
+static long long getLongVal(Exp* e) {
+    if (auto* n = dynamic_cast<NumberExp*>(e)) return (long long)n->value;
+    if (auto* f = dynamic_cast<FloatExp*>(e)) return (long long)f->value;
+    if (auto* l = dynamic_cast<LongExp*>(e)) return l->value;
+    if (auto* u = dynamic_cast<UnsignedExp*>(e)) return (long long)u->value;
+    return 0;
+}
+
+static unsigned int getUnsignedVal(Exp* e) {
+    if (auto* n = dynamic_cast<NumberExp*>(e)) return (unsigned int)n->value;
+    if (auto* f = dynamic_cast<FloatExp*>(e)) return (unsigned int)f->value;
+    if (auto* l = dynamic_cast<LongExp*>(e)) return (unsigned int)l->value;
+    if (auto* u = dynamic_cast<UnsignedExp*>(e)) return u->value;
+    return 0;
+}
+
+static int getIntVal(Exp* e) {
+    if (auto* n = dynamic_cast<NumberExp*>(e)) return n->value;
+    if (auto* f = dynamic_cast<FloatExp*>(e)) return (int)f->value;
+    if (auto* l = dynamic_cast<LongExp*>(e)) return (int)l->value;
+    if (auto* u = dynamic_cast<UnsignedExp*>(e)) return (int)u->value;
+    return 0;
+}
+
+static Exp* tryFold(Exp* l, Exp* r, BinaryOp op) {
+    if (!isConstant(l) || !isConstant(r)) {
+        return new BinaryExp(l, r, op);
+    }
+
+    bool isFloat = (dynamic_cast<FloatExp*>(l) || dynamic_cast<FloatExp*>(r));
+    bool isLong  = (dynamic_cast<LongExp*>(l) || dynamic_cast<LongExp*>(r));
+    bool isUns   = (dynamic_cast<UnsignedExp*>(l) || dynamic_cast<UnsignedExp*>(r));
+
+    Exp* resultNode = nullptr;
+    bool do_fold = true;
+
+    // --- CASO FLOAT ---
+    if (isFloat) {
+        double v1 = getDoubleVal(l);
+        double v2 = getDoubleVal(r);
+        double res = 0.0;
+        bool isComp = false;
+
+        switch(op) {
+            case PLUS_OP: res = v1 + v2; break;
+            case MINUS_OP: res = v1 - v2; break;
+            case MUL_OP: res = v1 * v2; break;
+            case DIV_OP: 
+                if (v2 != 0.0) res = v1 / v2; 
+                else do_fold = false; 
+                break;
+            case GT_OP:  resultNode = new NumberExp(v1 > v2); isComp = true; break;
+            case LT_OP:  resultNode = new NumberExp(v1 < v2); isComp = true; break;
+            case GEQ_OP: resultNode = new NumberExp(v1 >= v2); isComp = true; break;
+            case LE_OP:  resultNode = new NumberExp(v1 <= v2); isComp = true; break;
+            case EQ_OP:  resultNode = new NumberExp(v1 == v2); isComp = true; break;
+            case NEQ_OP: resultNode = new NumberExp(v1 != v2); isComp = true; break;
+            default: do_fold = false;
+        }
+
+        if (do_fold && !isComp) {
+            resultNode = new FloatExp(res);
+        }
+    }
+    // --- CASO LONG ---
+    else if (isLong) {
+        long long v1 = getLongVal(l);
+        long long v2 = getLongVal(r);
+        long long res = 0;
+        bool isComp = false;
+
+        switch(op) {
+            case PLUS_OP: res = v1 + v2; break;
+            case MINUS_OP: res = v1 - v2; break;
+            case MUL_OP: res = v1 * v2; break;
+            case DIV_OP: 
+                if (v2 != 0) res = v1 / v2; else do_fold = false; 
+                break;
+            case GT_OP:  resultNode = new NumberExp(v1 > v2); isComp = true; break;
+            case LT_OP:  resultNode = new NumberExp(v1 < v2); isComp = true; break;
+            case GEQ_OP: resultNode = new NumberExp(v1 >= v2); isComp = true; break;
+            case LE_OP:  resultNode = new NumberExp(v1 <= v2); isComp = true; break;
+            case EQ_OP:  resultNode = new NumberExp(v1 == v2); isComp = true; break;
+            case NEQ_OP: resultNode = new NumberExp(v1 != v2); isComp = true; break;
+            default: do_fold = false;
+        }
+        if (do_fold && !isComp) resultNode = new LongExp(res);
+    }
+    // --- CASO UNSIGNED ---
+    else if (isUns) {
+        unsigned int v1 = getUnsignedVal(l);
+        unsigned int v2 = getUnsignedVal(r);
+        unsigned int res = 0;
+        bool isComp = false;
+
+        switch(op) {
+            case PLUS_OP: res = v1 + v2; break;
+            case MINUS_OP: res = v1 - v2; break;
+            case MUL_OP: res = v1 * v2; break;
+            case DIV_OP: 
+                if (v2 != 0) res = v1 / v2; else do_fold = false; 
+                break;
+            case GT_OP:  resultNode = new NumberExp(v1 > v2); isComp = true; break;
+            case LT_OP:  resultNode = new NumberExp(v1 < v2); isComp = true; break;
+            case GEQ_OP: resultNode = new NumberExp(v1 >= v2); isComp = true; break;
+            case LE_OP:  resultNode = new NumberExp(v1 <= v2); isComp = true; break;
+            case EQ_OP:  resultNode = new NumberExp(v1 == v2); isComp = true; break;
+            case NEQ_OP: resultNode = new NumberExp(v1 != v2); isComp = true; break;
+            default: do_fold = false;
+        }
+        if (do_fold && !isComp) resultNode = new UnsignedExp(res);
+    }
+    // --- CASO INT ---
+    else {
+        int v1 = getIntVal(l);
+        int v2 = getIntVal(r);
+        int res = 0;
+        
+        switch(op) {
+            case PLUS_OP: res = v1 + v2; break;
+            case MINUS_OP: res = v1 - v2; break;
+            case MUL_OP: res = v1 * v2; break;
+            case DIV_OP: 
+                if (v2 != 0) res = v1 / v2; else do_fold = false; 
+                break;
+            case GT_OP:  res = (v1 > v2); break;
+            case LT_OP:  res = (v1 < v2); break;
+            case GEQ_OP: res = (v1 >= v2); break;
+            case LE_OP:  res = (v1 <= v2); break;
+            case EQ_OP:  res = (v1 == v2); break;
+            case NEQ_OP: res = (v1 != v2); break;
+            default: do_fold = false;
+        }
+        if (do_fold) resultNode = new NumberExp(res);
+    }
+
+    if (do_fold && resultNode) {
+        delete l;
+        delete r;
+        return resultNode;
+    }
+
+    return new BinaryExp(l, r, op);
+}
+
 // =============================
 // Reglas gramaticales de C
 // =============================
@@ -76,7 +234,6 @@ Program* Parser::parseProgram() {
             }
         }
     }
-    cout << "Parser de C exitoso" << endl;
     return p;
 }
 
@@ -299,11 +456,9 @@ ForStm* Parser::parseForStm() {
     return new ForStm(init, cond, incr, body);
 }
 
-
-
 // Nivel 1: Asignación
 Exp* Parser::parseAssignment() {
-    Exp* l = parseComparison(); // Nivel inferior
+    Exp* l = parseComparison();
 
     if (match(Token::ASSIGN)) {
         Exp* r = parseAssignment();
@@ -316,12 +471,12 @@ Exp* Parser::parseAssignment() {
             throw runtime_error("Lado izquierdo de asignacion invalido.");
         }
     }
-    return l; // No era una asignación
+    return l;
 }
 
 // Nivel 2: Comparación
 Exp* Parser::parseComparison() {
-    Exp* l = parseE(); // Nivel inferior
+    Exp* l = parseE(); 
     
     while(match(Token::EQ) || match(Token::NEQ) || match(Token::LT) || 
           match(Token::LE) || match(Token::GT) || match(Token::GEQ)) 
@@ -335,7 +490,7 @@ Exp* Parser::parseComparison() {
         else if (previous->type == Token::GEQ) op = GEQ_OP;
         
         Exp* r = parseE();
-        l = new BinaryExp(l, r, op);
+        l = tryFold(l, r, op);
     }
     return l;
 }
@@ -344,15 +499,9 @@ Exp* Parser::parseComparison() {
 Exp* Parser::parseE() {
     Exp* l = parseT();
     while (match(Token::PLUS) || match(Token::MINUS)) {
-        BinaryOp op;
-        if (previous->type == Token::PLUS){
-            op = PLUS_OP;
-        }
-        else{
-            op = MINUS_OP;
-        }
+        BinaryOp op = (previous->type == Token::PLUS) ? PLUS_OP : MINUS_OP;
         Exp* r = parseT();
-        l = new BinaryExp(l, r, op);
+        l = tryFold(l, r, op);
     }
     return l;
 }
@@ -361,15 +510,9 @@ Exp* Parser::parseE() {
 Exp* Parser::parseT() {
     Exp* l = parseF();
     while (match(Token::MUL) || match(Token::DIV)) {
-        BinaryOp op;
-        if (previous->type == Token::MUL){
-            op = MUL_OP;
-        }
-        else{
-            op = DIV_OP;
-        }
+        BinaryOp op = (previous->type == Token::MUL) ? MUL_OP : DIV_OP;
         Exp* r = parseF();
-        l = new BinaryExp(l, r, op);
+        l = tryFold(l, r, op);
     }
     return l;
 }
@@ -379,16 +522,22 @@ Exp* Parser::parseF() {
     Exp* e;
     string nom;
     if (match(Token::MINUS)) {
-        Exp* operand = parseF(); 
-        
-        return new BinaryExp(new NumberExp(0), operand, MINUS_OP);
+        Exp* operand = parseF();
+        return tryFold(new NumberExp(0), operand, MINUS_OP);
     }
+
     if (match(Token::INT_CONST)) { 
         try {
             return new NumberExp(stoi(previous->text));
         } catch (const std::out_of_range& e) {
             return new LongExp(stoll(previous->text));
         }
+    }
+    else if (match(Token::LONG_CONST)) {
+        return new LongExp(stoll(previous->text));
+    }
+    else if (match(Token::UINT_CONST)) {
+        return new UnsignedExp((unsigned int)stoul(previous->text));
     }
     else if (match(Token::FLOAT_CONST)) {
         return new FloatExp(stod(previous->text));
@@ -433,9 +582,9 @@ Exp* Parser::parseF() {
         }
         else {
             return new IdExp(nom);
-            }
+        }
     }
     else {
-        throw runtime_error("Error sintáctico: Se esperaba una expresion.");
+        throw runtime_error("Error sintáctico: Se esperaba una expresion (numero, id, etc).");
     }
 }

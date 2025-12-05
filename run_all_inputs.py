@@ -5,10 +5,7 @@ import shutil
 # --- CONFIGURACIÓN DE ARCHIVOS ---
 
 # Archivos C++ del compilador
-programa_compilador = ["main.cpp", "scanner.cpp", "token.cpp", "parser.cpp", "ast.cpp", "visitor_traced.cpp"]
-
-# Nuevo archivo C del módulo de runtime
-programa_runtime = ["runtime_trace.c"]
+programa_compilador = ["main.cpp", "scanner.cpp", "token.cpp", "parser.cpp", "ast.cpp", "visitor.cpp"]
 
 # Nombre del ejecutable del compilador (generador de .s)
 COMPILER_EXEC = "./compilador"
@@ -79,7 +76,7 @@ for i in range(1, 19):
                 print("-> Compilando y Enlazando para traza...")
                 
                 # Comando para crear el ejecutable final (ASM en outputs + runtime_trace)
-                link_cmd = ["gcc", output_asm] + programa_runtime + ["-o", TEST_EXEC]
+                link_cmd = ["gcc", output_asm, "-o", TEST_EXEC]
                 
                 # Ejecutar la compilación/enlazado
                 link_result = subprocess.run(link_cmd, capture_output=True, text=True)

@@ -9,17 +9,13 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    bool enable_tracing = false;
     string input_file;
     string output_file;
     
     // Procesar argumentos
     for (int i = 1; i < argc; i++) {
         string arg = argv[i];
-        if (arg == "--trace") {
-            enable_tracing = true;
-            cout << "✅ Modo traza activado" << endl;
-        } else if (arg == "-o" && i + 1 < argc) {
+        if (arg == "-o" && i + 1 < argc) {
             output_file = argv[++i];
         } else {
             input_file = arg;
@@ -69,7 +65,6 @@ int main(int argc, char* argv[]) {
         }
         
         GenCodeVisitor generator(out);
-        generator.enableTracing(enable_tracing);
         generator.generar(program);
         
         cout << "✅ Compilación exitosa: " << output_file << endl;

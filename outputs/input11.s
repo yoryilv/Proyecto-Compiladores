@@ -6,36 +6,32 @@ print_fmt_float: .string "%f \n"
 main:
     pushq %rbp
     movq %rsp, %rbp
-    subq $48, %rsp
- movq $5, %rax
- movq %rax, -16(%rbp)
- movsd .LC_FLT_0(%rip), %xmm0
- movsd %xmm0, -24(%rbp)
- # DEBUG BinaryExp: left_type=0, right_type=0, op=+
- movq -16(%rbp), %rax
- movsd -24(%rbp), %xmm0
- # OPERACIÓN MIXTA INT/FLOAT DETECTADA
- cvtsi2sdq %rax, %xmm1
+    subq $32, %rsp
+ movl $5, %eax
+ movl %eax, -4(%rbp)
+ movl $1075838976, %eax
+ movd %eax, %xmm0
+ movsd %xmm0, -12(%rbp)
+ movslq -4(%rbp), %rax
+ pushq %rax
+ movsd -12(%rbp), %xmm0
+ # OPERACIÓN FLOTANTE
+ movsd %xmm0, %xmm1
+ popq %rax
+ cvtsi2sdq %rax, %xmm0
  addsd %xmm1, %xmm0
- movsd %xmm0, -32(%rbp)
- # DEBUG FcallExp: nombre=printf, nargs=2
- # DEBUG: Entrando en caso especial printf
- movsd -32(%rbp), %xmm0
- # DEBUG: argumento 1 tipo=2
- # DEBUG: num_float_args=1
- movsd -32(%rbp), %xmm0
+ movsd %xmm0, -20(%rbp)
+ movsd -20(%rbp), %xmm0
+ movsd -20(%rbp), %xmm0
  movsd %xmm0, %xmm0
- leaq .LC_STR_1(%rip), %rdi
- # DEBUG: Antes de establecer %eax
+ leaq .LC_STR_0(%rip), %rdi
  movl $1, %eax
- # DEBUG: Establecido %eax=1 para floats
  call printf@PLT
- movq $0, %rax
+ movl $0, %eax
  jmp .end_main
 .end_main:
     leave
     ret
 .section .rodata
-.LC_FLT_0: .double 2.5
-.LC_STR_1: .string "%f\n"
+.LC_STR_0: .string "%f\n"
 .section .note.GNU-stack,"",@progbits

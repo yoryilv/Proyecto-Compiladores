@@ -6,16 +6,13 @@ print_fmt_float: .string "%f \n"
 main:
     pushq %rbp
     movq %rsp, %rbp
-    subq $112, %rsp
- movq $0, %rax
- movq %rax, -88(%rbp)
+    subq $48, %rsp
+ movl $0, %eax
+ movl %eax, -40(%rbp)
 for_start_0:
- # DEBUG BinaryExp: left_type=0, right_type=0, op=<
- movq -88(%rbp), %rax
- movq $3, %rax
- movq -88(%rbp), %rax
+ movslq -40(%rbp), %rax
  pushq %rax
- movq $3, %rax
+ movl $3, %eax
  movq %rax, %rcx
  popq %rax
  cmpq %rcx, %rax
@@ -24,97 +21,82 @@ for_start_0:
  movzbq %al, %rax
  cmpq $0, %rax
  je for_end_0
- movq $1, %rax
+ movl $1, %eax
  pushq %rax
  movq $0, %r11
  imulq $3, %r11
- movq -88(%rbp), %rax
+ movslq -40(%rbp), %rax
  addq %rax, %r11
  imulq $3, %r11
- movq -88(%rbp), %rax
+ movslq -40(%rbp), %rax
  addq %rax, %r11
- imulq $8, %r11
- leaq -80(%rbp), %r10
+ imulq $4, %r11
+ leaq -36(%rbp), %r10
  addq %r11, %r10
  popq %rax
- movq %rax, (%r10)
- # DEBUG BinaryExp: left_type=0, right_type=0, op=+
- movq -88(%rbp), %rax
- movq $1, %rax
- movq -88(%rbp), %rax
+ movl %eax, (%r10)
+ movslq -40(%rbp), %rax
  pushq %rax
- movq $1, %rax
+ movl $1, %eax
  movq %rax, %rcx
  popq %rax
  addq %rcx, %rax
- movq %rax, -88(%rbp)
+ movl %eax, -40(%rbp)
  jmp for_start_0
 for_end_0:
- # DEBUG FcallExp: nombre=printf, nargs=2
- # DEBUG: Entrando en caso especial printf
  movq $0, %r11
  imulq $3, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
  imulq $3, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
- imulq $8, %r11
- leaq -80(%rbp), %rax
+ imulq $4, %r11
+ leaq -36(%rbp), %rax
  addq %r11, %rax
- movq (%rax), %rax
- # DEBUG: argumento 1 tipo=0
- # DEBUG: num_float_args=0
+ movslq (%rax), %rax
  movq $0, %r11
  imulq $3, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
  imulq $3, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
- imulq $8, %r11
- leaq -80(%rbp), %rax
+ imulq $4, %r11
+ leaq -36(%rbp), %rax
  addq %r11, %rax
- movq (%rax), %rax
+ movslq (%rax), %rax
  movq %rax, %rsi
  leaq .LC_STR_1(%rip), %rdi
- # DEBUG: Antes de establecer %eax
  movl $0, %eax
- # DEBUG: Establecido %eax=0 para enteros
  call printf@PLT
- # DEBUG FcallExp: nombre=printf, nargs=2
- # DEBUG: Entrando en caso especial printf
  movq $0, %r11
  imulq $3, %r11
- movq $0, %rax
+ movl $0, %eax
  addq %rax, %r11
  imulq $3, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
- imulq $8, %r11
- leaq -80(%rbp), %rax
+ imulq $4, %r11
+ leaq -36(%rbp), %rax
  addq %r11, %rax
- movq (%rax), %rax
- # DEBUG: argumento 1 tipo=0
- # DEBUG: num_float_args=0
+ movslq (%rax), %rax
  movq $0, %r11
  imulq $3, %r11
- movq $0, %rax
+ movl $0, %eax
  addq %rax, %r11
  imulq $3, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
- imulq $8, %r11
- leaq -80(%rbp), %rax
+ imulq $4, %r11
+ leaq -36(%rbp), %rax
  addq %r11, %rax
- movq (%rax), %rax
+ movslq (%rax), %rax
  movq %rax, %rsi
  leaq .LC_STR_2(%rip), %rdi
- # DEBUG: Antes de establecer %eax
  movl $0, %eax
- # DEBUG: Establecido %eax=0 para enteros
  call printf@PLT
- movq $0, %rax
+ movl $0, %eax
  jmp .end_main
 .end_main:
     leave

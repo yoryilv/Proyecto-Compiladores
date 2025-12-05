@@ -6,81 +6,28 @@ print_fmt_float: .string "%f \n"
 main:
     pushq %rbp
     movq %rsp, %rbp
-    subq $64, %rsp
- movq $10, %rax
- movq %rax, -16(%rbp)
- movq $2, %rax
- movq %rax, -24(%rbp)
- movq $5, %rax
- movq %rax, -32(%rbp)
- # DEBUG BinaryExp: left_type=0, right_type=0, op=-
- # DEBUG BinaryExp: left_type=0, right_type=0, op=+
- movq -16(%rbp), %rax
- # DEBUG BinaryExp: left_type=0, right_type=0, op=*
- movq -24(%rbp), %rax
- movq -32(%rbp), %rax
- movq -24(%rbp), %rax
+    subq $16, %rsp
+ movl $10, %eax
+ movl %eax, -4(%rbp)
+ movl $2, %eax
+ movl %eax, -8(%rbp)
+ movl $5, %eax
+ movl %eax, -12(%rbp)
+ # Sethi-Ullman swap
+ movslq -8(%rbp), %rax
  pushq %rax
- movq -32(%rbp), %rax
+ movslq -12(%rbp), %rax
  movq %rax, %rcx
  popq %rax
  imulq %rcx, %rax
- movq -16(%rbp), %rax
  pushq %rax
- # DEBUG BinaryExp: left_type=0, right_type=0, op=*
- movq -24(%rbp), %rax
- movq -32(%rbp), %rax
- movq -24(%rbp), %rax
- pushq %rax
- movq -32(%rbp), %rax
- movq %rax, %rcx
- popq %rax
- imulq %rcx, %rax
- movq %rax, %rcx
- popq %rax
- addq %rcx, %rax
- # DEBUG BinaryExp: left_type=0, right_type=0, op=/
- movq -16(%rbp), %rax
- movq -24(%rbp), %rax
- movq -16(%rbp), %rax
- pushq %rax
- movq -24(%rbp), %rax
- movq %rax, %rcx
- popq %rax
- cqo
- idivq %rcx
- # DEBUG BinaryExp: left_type=0, right_type=1, op=+
- movq -16(%rbp), %rax
- # DEBUG BinaryExp: left_type=0, right_type=0, op=*
- movq -24(%rbp), %rax
- movq -32(%rbp), %rax
- movq -24(%rbp), %rax
- pushq %rax
- movq -32(%rbp), %rax
- movq %rax, %rcx
- popq %rax
- imulq %rcx, %rax
- movq -16(%rbp), %rax
- pushq %rax
- # DEBUG BinaryExp: left_type=0, right_type=0, op=*
- movq -24(%rbp), %rax
- movq -32(%rbp), %rax
- movq -24(%rbp), %rax
- pushq %rax
- movq -32(%rbp), %rax
- movq %rax, %rcx
- popq %rax
- imulq %rcx, %rax
- movq %rax, %rcx
- popq %rax
+ movslq -4(%rbp), %rax
+ popq %rcx
  addq %rcx, %rax
  pushq %rax
- # DEBUG BinaryExp: left_type=0, right_type=0, op=/
- movq -16(%rbp), %rax
- movq -24(%rbp), %rax
- movq -16(%rbp), %rax
+ movslq -4(%rbp), %rax
  pushq %rax
- movq -24(%rbp), %rax
+ movslq -8(%rbp), %rax
  movq %rax, %rcx
  popq %rax
  cqo
@@ -88,20 +35,14 @@ main:
  movq %rax, %rcx
  popq %rax
  subq %rcx, %rax
- movq %rax, -40(%rbp)
- # DEBUG FcallExp: nombre=printf, nargs=2
- # DEBUG: Entrando en caso especial printf
- movq -40(%rbp), %rax
- # DEBUG: argumento 1 tipo=0
- # DEBUG: num_float_args=0
- movq -40(%rbp), %rax
+ movl %eax, -16(%rbp)
+ movslq -16(%rbp), %rax
+ movslq -16(%rbp), %rax
  movq %rax, %rsi
  leaq .LC_STR_0(%rip), %rdi
- # DEBUG: Antes de establecer %eax
  movl $0, %eax
- # DEBUG: Establecido %eax=0 para enteros
  call printf@PLT
- movq $0, %rax
+ movl $0, %eax
  jmp .end_main
 .end_main:
     leave

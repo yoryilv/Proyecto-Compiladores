@@ -6,48 +6,42 @@ print_fmt_float: .string "%f \n"
 main:
     pushq %rbp
     movq %rsp, %rbp
-    subq $64, %rsp
- movq $1, %rax
- movq %rax, -40(%rbp)
- movq $2, %rax
- movq %rax, -32(%rbp)
- movq $3, %rax
- movq %rax, -24(%rbp)
- movq $4, %rax
- movq %rax, -16(%rbp)
- # DEBUG FcallExp: nombre=printf, nargs=2
- # DEBUG: Entrando en caso especial printf
+    subq $16, %rsp
+ movl $1, %eax
+ movl %eax, -16(%rbp)
+ movl $2, %eax
+ movl %eax, -12(%rbp)
+ movl $3, %eax
+ movl %eax, -8(%rbp)
+ movl $4, %eax
+ movl %eax, -4(%rbp)
  movq $0, %r11
  imulq $2, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
  imulq $2, %r11
- movq $0, %rax
+ movl $0, %eax
  addq %rax, %r11
- imulq $8, %r11
- leaq -40(%rbp), %rax
+ imulq $4, %r11
+ leaq -16(%rbp), %rax
  addq %r11, %rax
- movq (%rax), %rax
- # DEBUG: argumento 1 tipo=0
- # DEBUG: num_float_args=0
+ movslq (%rax), %rax
  movq $0, %r11
  imulq $2, %r11
- movq $1, %rax
+ movl $1, %eax
  addq %rax, %r11
  imulq $2, %r11
- movq $0, %rax
+ movl $0, %eax
  addq %rax, %r11
- imulq $8, %r11
- leaq -40(%rbp), %rax
+ imulq $4, %r11
+ leaq -16(%rbp), %rax
  addq %r11, %rax
- movq (%rax), %rax
+ movslq (%rax), %rax
  movq %rax, %rsi
  leaq .LC_STR_0(%rip), %rdi
- # DEBUG: Antes de establecer %eax
  movl $0, %eax
- # DEBUG: Establecido %eax=0 para enteros
  call printf@PLT
- movq $0, %rax
+ movl $0, %eax
  jmp .end_main
 .end_main:
     leave

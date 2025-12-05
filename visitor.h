@@ -33,12 +33,12 @@ public:
     // 
     virtual int visit(BinaryExp* exp) = 0;
     virtual int visit(NumberExp* exp) = 0;
-    virtual int visit(FloatExp* exp) = 0; // nuevo para floats 
+    virtual int visit(FloatExp* exp) = 0;
     virtual int visit(StringExp* exp) = 0;
     virtual int visit(LongExp* exp) = 0;
     virtual int visit(UnsignedExp* exp) = 0;
     virtual int visit(IdExp* exp) = 0;
-    virtual int visit(ArrayAccessExp* exp) = 0; // PARA ARRS WA
+    virtual int visit(ArrayAccessExp* exp) = 0;
     virtual int visit(Program* p) = 0;
     virtual int visit(WhileStm* stm) = 0;
     virtual int visit(ForStm* stm) = 0;
@@ -65,7 +65,7 @@ public:
     unordered_map<string, bool> memoriaGlobal;
     unordered_map<string, CType> globalTypes;
     unordered_map<string, int> fun_memoria;
-    int offset = -8;
+    int offset = 0;
     CType currentFunReturnType; 
     bool entornoFuncion = false;
 
@@ -97,7 +97,7 @@ public:
 class GenCodeVisitor : public Visitor {
 private:
     std::ostream& out;
-    bool enable_tracing = true;
+    int getWeight(Exp* e);
 public:
     TypeCheckVisitor type_checker;
 
@@ -105,16 +105,10 @@ public:
     vector<pair<int, string>> string_literals;
 
     unordered_map<string, VarInfo> local_vars;
-    int gen_offset = -8;
+    int gen_offset = 0;
 
     int labelcont = 0;
     string nombreFuncion;
-
-    void injectLogCall(const std::string& asm_instruction_type, 
-                      const std::string& source_context = "", 
-                      int line_number = 0);
-
-    void enableTracing(bool enable) { enable_tracing = enable; }
     
     GenCodeVisitor(std::ostream& out) : out(out) {}
     int generar(Program* program);

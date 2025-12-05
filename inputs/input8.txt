@@ -1,7 +1,8 @@
 #include <stdio.h>
 int main() {
-    long gran_numero = 2147483648;
-    unsigned uneg = 10;
+    long gran_numero = 2147483648L; 
+
+    unsigned uneg = 10U; 
     
     printf("%ld\n", gran_numero);
     
